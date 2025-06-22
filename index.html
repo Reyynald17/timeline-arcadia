@@ -54,52 +54,49 @@
   <p>Tanggal & waktu ACD sekarang:</p>
   <h2 id="acdTime"></h2>
 
-  <script>
-    const acdkalender = new Date("2025-06-16T00:00:00Z");
-    const tolkur = 365 / 7;
-    const acdOutput = document.getElementById("acdTime");
+ <script>
+  const acdEpoch = new Date("2025-06-16T00:00:00Z"); // awal tahun 1851 ACD
+  const msPerRlMs = 365 / 7; // 1 ms RL = 52.14 ms ACD
+  const acdDisplay = document.getElementById("acdTime");
 
-    function pad(n) {
-      return String(n).padStart(2, '0');
-    }
+  function pad(n) {
+    return String(Math.floor(n)).padStart(2, '0');
+  }
 
-    function formatACDTime() {
-      const skrg = Date.now();
+  function formatACDTime() {
+    const nowRl = Date.now();
+    const diffMsRl = nowRl - acdEpoch.getTime();
+    const diffMsAcd = diffMsRl * msPerRlMs;
 
-      const selisihRL = skrg - acdkalender.getTime();
-      const selisihACD = selisihRL * tolkur;
+    const totalSeconds = diffMsAcd / 1000;
+    const totalMinutes = totalSeconds / 60;
+    const totalHours = totalMinutes / 60;
+    const totalDays = totalHours / 24;
 
-      const totdik = selisihACD / 1000;
-      let sisaDik = totdik;
+    let year = 1851 + Math.floor(totalDays / 360); // 360 hari per tahun ACD
+    let dayOfYear = totalDays % 360;
+    if (dayOfYear < 0) {
+      year -= 1;
+      dayOfYear += 360;
+    }
 
-      const dik = ((sisaDik % 60) + 60) % 60;
-      sisaDik /= 60;
-      const men = ((sisaDik % 60) + 60) % 60;
-      sisaDik /= 60;
-      const jam = ((sisaDik % 24) + 24) % 24;
-      const totHar = sisaDik / 24;
+    const month = Math.floor(dayOfYear / 30) + 1;
+    const day = Math.floor(dayOfYear % 30) + 1;
 
-      let tahunSaatIni = 1851 + Math.floor(totHar / 365);
+    const hour = Math.floor(totalHours % 24);
+    const minute = Math.floor(totalMinutes % 60);
+    const second = Math.floor(totalSeconds % 60);
 
-      let hariDariTahun = Math.floor(totHar % 365);
-      if (hariDariTahun < 0) {
-        tahunSaatIni -= 1;
-        hariDariTahun += 365;
-      }
+    return `${pad(day)}-${pad(month)}-${year} ACD ` +
+           `${pad(hour)}:${pad(minute)}:${pad(second)}`;
+  }
 
-      const bulan = Math.floor(hariDariTahun / 30) + 1;
-      const hari = (hariDariTahun % 30) + 1;
+  function renderACDTime() {
+    acdDisplay.textContent = formatACDTime();
+    requestAnimationFrame(renderACDTime);
+  }
 
-      return `${pad(hari)}-${pad(bulan)}-${tahunSaatIni} ACD ` +
-             `${pad(Math.floor(jam))}:${pad(Math.floor(men))}:${pad(Math.floor(dik))}`;
-    }
-
-    function renderACDTime() {
-      acdOutput.textContent = formatACDTime();
-      requestAnimationFrame(renderACDTime);
-    }
-
-    renderACDTime();
-  </script>
+  renderACDTime();
+</script>
 </body>
 </html>
