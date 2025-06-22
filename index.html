@@ -1,102 +1,116 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Kalender Arcadia</title>
-  <link rel="icon" href="logo.png" type="image/png">
-  <style>
-    body {
-      background-color: #121212;
-      color: #f0f0f0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-    }
-
-    #arcadiaLogo {
-      width: 300px;
-      margin-bottom: 15px;
-      filter: drop-shadow(0 0 6px rgba(144,202,249,0.5));
-    }
-
-    h1 {
-      color: #90caf9;
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-    }
-
-    p {
-      font-size: 1.2rem;
-      color: #b0bec5;
-    }
-
-    #acdTime {
-      font-size: 2rem;
-      background: #263238;
-      padding: 20px 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      margin-top: 15px;
-      letter-spacing: 1px;
-      transition: all 0.1s ease-out;
-    }
-  </style>
-</head>
-<body>
-  
-  <img id="arcadiaLogo" src="logo.png" alt="Simbol Arcadia">
-
-  <h1>Timeline Arcadia (ACD)</h1>
-  <p>Tanggal & waktu ACD sekarang:</p>
-  <h2 id="acdTime"></h2>
-
- <script>
-  const acdEpoch = new Date("2025-06-16T00:00:00Z"); // awal tahun 1851 ACD
-  const msPerRlMs = 365 / 7; // 1 ms RL = 52.14 ms ACD
-  const acdDisplay = document.getElementById("acdTime");
-
-  function pad(n) {
-    return String(Math.floor(n)).padStart(2, '0');
-  }
-
-  function formatACDTime() {
-    const nowRl = Date.now();
-    const diffMsRl = nowRl - acdEpoch.getTime();
-    const diffMsAcd = diffMsRl * msPerRlMs;
-
-    const totalSeconds = diffMsAcd / 1000;
-    const totalMinutes = totalSeconds / 60;
-    const totalHours = totalMinutes / 60;
-    const totalDays = totalHours / 24;
-
-    let year = 1851 + Math.floor(totalDays / 360); // 360 hari per tahun ACD
-    let dayOfYear = totalDays % 360;
-    if (dayOfYear < 0) {
-      year -= 1;
-      dayOfYear += 360;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalender Arcadia</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #f0f0f0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
     }
 
-    const month = Math.floor(dayOfYear / 30) + 1;
-    const day = Math.floor(dayOfYear % 30) + 1;
+    .container {
+      text-align: center;
+      max-width: 90%;
+      width: 500px;
+    }
 
-    const hour = Math.floor(totalHours % 24);
-    const minute = Math.floor(totalMinutes % 60);
-    const second = Math.floor(totalSeconds % 60);
+    #arcadiaLogo {
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      margin-bottom: 15px;
+      filter: drop-shadow(0 0 6px rgba(144,202,249,0.5));
+    }
 
-    return `${pad(day)}-${pad(month)}-${year} ACD ` +
-           `${pad(hour)}:${pad(minute)}:${pad(second)}`;
-  }
+    h1 {
+      color: #90caf9;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
 
-  function renderACDTime() {
-    acdDisplay.textContent = formatACDTime();
-    requestAnimationFrame(renderACDTime);
-  }
+    p {
+      font-size: 1.2rem;
+      color: #cfd8dc;
+      margin-bottom: 10px;
+    }
 
-  renderACDTime();
-</script>
+    #acdTime {
+      font-size: 2rem;
+      background: #263238;
+      padding: 20px 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      margin-top: 15px;
+      letter-spacing: 1px;
+      transition: background 0.3s, transform 0.2s ease;
+    }
+
+    #acdTime:hover {
+      transform: scale(1.02);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img id="arcadiaLogo" src="logo.png" alt="Simbol Arcadia">
+    <h1>Timeline Arcadia (ACD)</h1>
+    <p>Tanggal & waktu ACD sekarang:</p>
+    <h2 id="acdTime"></h2>
+  </div>
+
+  <script>
+    const acdEpoch = new Date("2025-06-16T00:00:00Z"); 
+    const msPerRlMs = 365 / 7; 
+    const acdDisplay = document.getElementById("acdTime");
+
+    function pad(n) {
+      return String(Math.floor(n)).padStart(2, '0');
+    }
+
+    function formatACDTime() {
+      const nowRl = Date.now();
+      const diffMsRl = nowRl - acdEpoch.getTime();
+      const diffMsAcd = diffMsRl * msPerRlMs;
+
+      const totalSeconds = diffMsAcd / 1000;
+      const totalMinutes = totalSeconds / 60;
+      const totalHours = totalMinutes / 60;
+      const totalDays = totalHours / 24;
+
+      let year = 1851 + Math.floor(totalDays / 360); // 360 hari per tahun ACD
+      let dayOfYear = totalDays % 360;
+      if (dayOfYear < 0) {
+        year -= 1;
+        dayOfYear += 360;
+      }
+
+      const month = Math.floor(dayOfYear / 30) + 1;
+      const day = Math.floor(dayOfYear % 30) + 1;
+
+      const hour = Math.floor(totalHours % 24);
+      const minute = Math.floor(totalMinutes % 60);
+      const second = Math.floor(totalSeconds % 60);
+
+      return `${pad(day)}-${pad(month)}-${year} ACD ` +
+             `${pad(hour)}:${pad(minute)}:${pad(second)}`;
+    }
+
+    function renderACDTime() {
+      acdDisplay.textContent = formatACDTime();
+      requestAnimationFrame(renderACDTime);
+    }
+
+    renderACDTime();
+  </script>
 </body>
 </html>
