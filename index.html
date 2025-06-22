@@ -1,105 +1,123 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Kalender Arcadia</title>
-  <style>
-    body {
-      background-color: #121212;
-      color: #f0f0f0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-    }
+  <meta charset="UTF-8">
+  <link rel="icon" href="logo.png" type="image/png">
+  <title>Kalender Arcadia</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #f0f0f0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
 
-    #arcadiaLogo {
-      width: 300px;
-      margin-bottom: 15px;
-      filter: drop-shadow(0 0 6px rgba(144,202,249,0.5));
-    }
+    #arcadiaLogo {
+      width: 300px;
+      margin-bottom: 15px;
+      filter: drop-shadow(0 0 6px rgba(144,202,249,0.5));
+    }
 
-    h1 {
-      color: #90caf9;
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-    }
+    h1 {
+      color: #90caf9;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
 
-    p {
-      font-size: 1.2rem;
-      color: #b0bec5;
-    }
+    p {
+      font-size: 1.2rem;
+      color: #b0bec5;
+    }
 
-    #acdTime {
-      font-size: 2rem;
-      background: #263238;
-      padding: 20px 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      margin-top: 15px;
-      letter-spacing: 1px;
-      transition: all 0.1s ease-out;
-    }
-  </style>
+    #acdTime {
+      font-size: 2rem;
+      background: #263238;
+      padding: 20px 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      margin-top: 15px;
+      letter-spacing: 1px;
+      transition: all 0.1s ease-out;
+    }
+  </style>
 </head>
 <body>
-  
-  <img id="arcadiaLogo" src="logo.png" alt="Simbol Arcadia">
+  
+  <img id="arcadiaLogo" src="logo.png" alt="Simbol Arcadia">
 
-  <h1>Timeline Arcadia (ACD)</h1>
-  <p>Tanggal & waktu ACD sekarang:</p>
-  <h2 id="acdTime"></h2>
+  <h1>Timeline Arcadia (ACD)</h1>
+  <p>Tanggal & waktu ACD sekarang:</p>
+  <h2 id="acdTime"></h2>
 
-  <script>
-    const acdkalender = new Date("2025-06-16T00:00:00Z");
-    const tolkur = 365 / 7; // 1 tahun ACD = 7 hari RL
-    const acdOutput = document.getElementById("acdTime");
+  <script>
+    const acdkalender = new Date("2025-06-16T00:00:00Z");
+    const tglPerubahanTahun = new Date("2025-06-23T00:00:00Z"); // update terkait timeskip per 6/23/2025, dilakukan 6/22/2025
+    const tolkur = 365 / 7; // 1 tahun ACD = 7 hari RL
+    const acdOutput = document.getElementById("acdTime");
 
-    function pad(n) {
-      return String(n).padStart(2, '0');
-    }
+    function pad(n) {
+      return String(n).padStart(2, '0');
+    }
 
-    function formatACDTime() {
-      const now = Date.now();
-      const msDiffRL = now - acdkalender.getTime();
-      const msDiffACD = msDiffRL * tolkur;
+    function formatACDTime() {
+      const skrg = Date.now(); // Sekarang
 
-      const totalSeconds = msDiffACD / 1000;
-      let remainingSeconds = totalSeconds;
+      let tahunDasarACD;
+      let titikAwalPerhitungan;
 
-      const second = ((remainingSeconds % 60) + 60) % 60;
-      remainingSeconds /= 60;
-      const minute = ((remainingSeconds % 60) + 60) % 60;
-      remainingSeconds /= 60;
-      const hour = ((remainingSeconds % 24) + 24) % 24;
-      const totalDays = remainingSeconds / 24;
+      // Cek apakah kita sudah melewati tanggal perubahan tahun
+      if (skrg >= tglPerubahanTahun.getTime()) {
+        // Setelah 23 Juni 2025, tahun dasar Arcadia adalah 1860
+        tahunDasarACD = 1860;
+        // Titik awal perhitungan selisih juga berubah ke tglPerubahanTahun
+        // untuk menjaga konsistensi pergerakan waktu dari 1860
+        titikAwalPerhitungan = tglPerubahanTahun.getTime();
+      } else {
+        // Sebelum 23 Juni 2025, tahun dasar Arcadia adalah 1851
+        tahunDasarACD = 1851;
+        titikAwalPerhitungan = acdkalender.getTime();
+      }
 
-      let year = 1851;
-      let daysLeft = Math.floor(totalDays);
+      const selisihRL = skrg - titikAwalPerhitungan; // Selisih Real Life dari titik awal yang relevan
+      const selisihACD = selisihRL * tolkur; // Selisih Arcadia
 
-      year += Math.floor(daysLeft / 365);
-      let dayOfYear = daysLeft % 365;
-      if (dayOfYear < 0) {
-        year -= 1;
-        dayOfYear += 365;
-      }
+      const totdik = selisihACD / 1000; // Total Detik
+      let sisaDik = totdik; // Sisa Detik
 
-      const month = Math.floor(dayOfYear / 30) + 1;
-      const day = (dayOfYear % 30) + 1;
+      const dik = ((sisaDik % 60) + 60) % 60; // Detik
+      sisaDik /= 60;
+      const men = ((sisaDik % 60) + 60) % 60; // Menit
+      sisaDik /= 60;
+      const jam = ((sisaDik % 24) + 24) % 24; // Jam
+      const totHar = sisaDik / 24; // Total Hari
 
-      return `${pad(day)}-${pad(month)}-${year} ACD ` +
-             `${pad(Math.floor(hour))}:${pad(Math.floor(minute))}:${pad(Math.floor(second))}`;
-    }
+      let tahun = tahunDasarACD + Math.floor(totHar / 365); // Tahun
 
-    function renderACDTime() {
-      acdOutput.textContent = formatACDTime();
-      requestAnimationFrame(renderACDTime);
-    }
+      let hariDariTahun = Math.floor(totHar % 365); // Hari dari Tahun
+      // Penyesuaian untuk hari negatif (jika selisih waktu Arcadia negatif)
+      if (hariDariTahun < 0) {
+        tahun -= 1;
+        hariDariTahun += 365;
+      }
 
-    renderACDTime();
-  </script>
+      const bulan = Math.floor(hariDariTahun / 30) + 1; // Bulan
+      const hari = (hariDariTahun % 30) + 1; // Hari
+
+      return `${pad(hari)}-${pad(bulan)}-${tahun} ACD ` +
+             `${pad(Math.floor(jam))}:${pad(Math.floor(men))}:${pad(Math.floor(dik))}`;
+    }
+
+    function renderACDTime() {
+      acdOutput.textContent = formatACDTime();
+      requestAnimationFrame(renderACDTime);
+    }
+
+    renderACDTime();
+  </script>
 </body>
 </html>
