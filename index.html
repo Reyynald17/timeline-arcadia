@@ -70,6 +70,7 @@
 
   <script>
     const acdEpoch = new Date("2025-06-16T00:00:00Z"); 
+    const tglPerubahanTahun = new Date("2025-06-23T00:00:00Z"); 
     const msPerRlMs = 365 / 7; 
     const acdDisplay = document.getElementById("acdTime");
 
@@ -78,17 +79,30 @@
     }
 
     function formatACDTime() {
-      const nowRl = Date.now();
-      const diffMsRl = nowRl - acdEpoch.getTime();
-      const diffMsAcd = diffMsRl * msPerRlMs;
+      const skrg = Date.now();
 
-      const totalSeconds = diffMsAcd / 1000;
+      let tahunDasarACD;
+      let titikAwalPerhitungan;
+
+      if (skrg >= tglPerubahanTahun.getTime()) {
+        tahunDasarACD = 1860;
+        titikAwalPerhitungan = tglPerubahanTahun.getTime();
+      } else {
+        tahunDasarACD = 1851;
+        titikAwalPerhitungan = acdEpoch.getTime();
+      }
+
+      const selisihRL = skrg - titikAwalPerhitungan;
+      const msAcd = selisihRL * msPerRlMs;
+
+      const totalSeconds = msAcd / 1000;
       const totalMinutes = totalSeconds / 60;
       const totalHours = totalMinutes / 60;
       const totalDays = totalHours / 24;
 
-      let year = 1851 + Math.floor(totalDays / 360); // 360 hari per tahun ACD
+      let year = tahunDasarACD + Math.floor(totalDays / 360);
       let dayOfYear = totalDays % 360;
+
       if (dayOfYear < 0) {
         year -= 1;
         dayOfYear += 360;
