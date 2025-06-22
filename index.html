@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Kalender Arcadia</title>
+  <link rel="icon" href="logo.png" type="image/png">
   <style>
     body {
       background-color: #121212;
@@ -55,50 +56,41 @@
 
   <script>
     const acdkalender = new Date("2025-06-16T00:00:00Z");
-    const tglPerubahanTahun = new Date("2025-06-23T00:00:00Z"); // timeskip ahh
-    const tolkur = 365 / 7; // 1 tahun ACD = 7 hari RL
+    const tolkur = 365 / 7;
     const acdOutput = document.getElementById("acdTime");
 
     function pad(n) {
       return String(n).padStart(2, '0');
     }
+
     function formatACDTime() {
-      const skrg = Date.now(); 
-      let tahunDasarACD;
-      let titikAwalPerhitungan;
-      if (skrg >= tglPerubahanTahun.getTime()) {
-        tahunDasarACD = 1860;
-        titikAwalPerhitungan = tglPerubahanTahun.getTime();
-      } else {
-        tahunDasarACD = 1851;
-        titikAwalPerhitungan = acdkalender.getTime();
-      }
+      const skrg = Date.now();
 
-      const selisihRL = skrg - titikAwalPerhitungan; 
-      const selisihACD = selisihRL * tolkur; 
+      const selisihRL = skrg - acdkalender.getTime();
+      const selisihACD = selisihRL * tolkur;
 
-      const totdik = selisihACD / 1000; // Total Detik
-      let sisaDik = totdik; // Sisa Detik
+      const totdik = selisihACD / 1000;
+      let sisaDik = totdik;
 
-      const dik = ((sisaDik % 60) + 60) % 60; // Detik
+      const dik = ((sisaDik % 60) + 60) % 60;
       sisaDik /= 60;
-      const men = ((sisaDik % 60) + 60) % 60; // Menit
+      const men = ((sisaDik % 60) + 60) % 60;
       sisaDik /= 60;
-      const jam = ((sisaDik % 24) + 24) % 24; // Jam
-      const totHar = sisaDik / 24; // Total Hari
+      const jam = ((sisaDik % 24) + 24) % 24;
+      const totHar = sisaDik / 24;
 
-      let tahun = tahunDasarACD + Math.floor(totHar / 365); 
+      let tahunSaatIni = 1851 + Math.floor(totHar / 365);
 
-      let hariDariTahun = Math.floor(totHar % 365); 
+      let hariDariTahun = Math.floor(totHar % 365);
       if (hariDariTahun < 0) {
-        tahun -= 1;
+        tahunSaatIni -= 1;
         hariDariTahun += 365;
       }
 
-      const bulan = Math.floor(hariDariTahun / 30) + 1; 
-      const hari = (hariDariTahun % 30) + 1; // Hari
+      const bulan = Math.floor(hariDariTahun / 30) + 1;
+      const hari = (hariDariTahun % 30) + 1;
 
-      return `${pad(hari)}-${pad(bulan)}-${tahun} ACD ` +
+      return `${pad(hari)}-${pad(bulan)}-${tahunSaatIni} ACD ` +
              `${pad(Math.floor(jam))}:${pad(Math.floor(men))}:${pad(Math.floor(dik))}`;
     }
 
