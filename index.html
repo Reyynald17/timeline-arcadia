@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kalender Arcadia</title>
   <style>
     body {
@@ -58,33 +58,76 @@
     #acdTime:hover {
       transform: scale(1.02);
     }
+
+    #calendar {
+      margin-top: 25px;
+      width: 100%;
+      box-sizing: border-box;
+      overflow-x: hidden;
+    }
+
+    #calendar h3 {
+      margin-bottom: 10px;
+      color: #b0bec5;
+      font-size: 1.2rem;
+      word-break: break-word;
+      white-space: normal;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+      gap: 5px;
+    }
+
+    .calendar-grid div {
+      padding: 10px;
+      border-radius: 6px;
+      background: #263238;
+      color: #cfd8dc;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .calendar-grid .today {
+      background: #90caf9;
+      color: #000;
+      box-shadow: 0 0 8px #90caf9;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <img id="arcadiaLogo" src="logo.png" alt="Simbol Arcadia">
+    <img id="arcadiaLogo" src="logo.png" alt="Simbol Arcadia" />
     <h1>Timeline Arcadia (ACD)</h1>
     <p>Tanggal & waktu ACD sekarang:</p>
     <h2 id="acdTime"></h2>
+    <div id="calendar"></div>
   </div>
 
   <script>
-    const acdEpoch = new Date("2025-06-16T00:00:00Z"); 
-    const tglPerubahanTahun = new Date("2025-06-23T00:00:00Z"); 
-    const msPerRlMs = 365 / 7; 
+    const acdEpoch = new Date("2025-06-16T00:00:00Z");
+    const tglPerubahanTahun = new Date("2025-06-23T00:00:00Z");
+    const msPerRlMs = 365 / 7;
     const acdDisplay = document.getElementById("acdTime");
+
+    const namaBulan = [
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
+
+    let currentACD = { year: 0, month: 0, day: 0 };
 
     function pad(n) {
       return String(Math.floor(n)).padStart(2, '0');
     }
 
     function formatACDTime() {
-      const skrg = Date.now();
-
+      const now = Date.now();
       let tahunDasarACD;
       let titikAwalPerhitungan;
 
-      if (skrg >= tglPerubahanTahun.getTime()) {
+      if (now >= tglPerubahanTahun.getTime()) {
         tahunDasarACD = 1860;
         titikAwalPerhitungan = tglPerubahanTahun.getTime();
       } else {
@@ -92,7 +135,7 @@
         titikAwalPerhitungan = acdEpoch.getTime();
       }
 
-      const selisihRL = skrg - titikAwalPerhitungan;
+      const selisihRL = now - titikAwalPerhitungan;
       const msAcd = selisihRL * msPerRlMs;
 
       const totalSeconds = msAcd / 1000;
@@ -110,17 +153,42 @@
 
       const month = Math.floor(dayOfYear / 30) + 1;
       const day = Math.floor(dayOfYear % 30) + 1;
-
       const hour = Math.floor(totalHours % 24);
       const minute = Math.floor(totalMinutes % 60);
       const second = Math.floor(totalSeconds % 60);
 
+      currentACD = { year, month, day };
       return `${pad(day)}-${pad(month)}-${year} ACD ` +
              `${pad(hour)}:${pad(minute)}:${pad(second)}`;
     }
 
+    function renderCalendar() {
+      const calendarContainer = document.getElementById("calendar");
+      calendarContainer.innerHTML = '';
+
+      const nama = namaBulan[(currentACD.month - 1) % 12];
+      const title = document.createElement('h3');
+      title.textContent = `${nama} - ${currentACD.year} ACD`;
+      calendarContainer.appendChild(title);
+
+      const grid = document.createElement('div');
+      grid.className = 'calendar-grid';
+
+      for (let i = 1; i <= 30; i++) {
+        const dayBox = document.createElement('div');
+        dayBox.textContent = i;
+        if (i === currentACD.day) {
+          dayBox.classList.add('today');
+        }
+        grid.appendChild(dayBox);
+      }
+
+      calendarContainer.appendChild(grid);
+    }
+
     function renderACDTime() {
       acdDisplay.textContent = formatACDTime();
+      renderCalendar();
       requestAnimationFrame(renderACDTime);
     }
 
