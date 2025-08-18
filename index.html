@@ -442,11 +442,11 @@
   </div>
 
   <script>
-    // Epoch ACD: 00:00 WIB 18 Agustus 2025 (RL) = 00:00 1 Januari 1890 (ACD)
+    // epoch nya 00:00 WIB 18 Agustut 2025, 1890
     const acdEpoch = new Date('2025-08-18T00:00:00+07:00');
     const acdDisplay = document.getElementById("acdTime");
 
-    const acdDayInRlSeconds = 27 * 60 + 37; // 1657 detik real = 1 hari ACD
+    const acdDayInRlSeconds = 27 * 60 + 37; 
     const acdHourInRlSeconds = acdDayInRlSeconds / 24;
     const acdMinuteInRlSeconds = acdHourInRlSeconds / 60;
 
@@ -468,36 +468,24 @@
 
     function formatACDTime() {
       const now = new Date();
-      
-      // Hitung total detik real yang berlalu sejak epoch ACD
       const totalRealSecondsElapsed = (now.getTime() - acdEpoch.getTime()) / 1000;
-      
-      // Konversi ke total detik ACD
       const totalAcdSeconds = totalRealSecondsElapsed / acdMinuteInRlSeconds * 60;
-      
-      // Hitung total hari ACD yang berlalu
       const totalAcdDays = Math.floor(totalAcdSeconds / (24 * 60 * 60));
-      
-      // Hitung tahun, bulan, hari ACD
       const acdYears = Math.floor(totalAcdDays / 360); // 1 tahun ACD = 360 hari
       const remainingDaysAfterYears = totalAcdDays % 360;
       const acdMonths = Math.floor(remainingDaysAfterYears / 30); // 1 bulan ACD = 30 hari
       const acdDay = (remainingDaysAfterYears % 30) + 1; // Hari dimulai dari 1
-      
-      // Tanggal ACD final (dimulai dari 1 Januari 1890)
       const year = 1890 + acdYears;
-      const month = acdMonths + 1; // Bulan dimulai dari 1 (Januari)
+      const month = acdMonths + 1; 
       const day = acdDay;
       
-      // Hitung jam, menit, detik dari sisa detik dalam hari
+      
       const secondsInCurrentDay = totalAcdSeconds % (24 * 60 * 60);
       const hour = Math.floor(secondsInCurrentDay / 3600);
       const minute = Math.floor((secondsInCurrentDay % 3600) / 60);
       const second = Math.floor(secondsInCurrentDay % 60);
 
       currentACD = { year, month, day };
-      
-      // Set viewing month jika belum diset
       if (viewingMonth === 0) {
         viewingMonth = month;
         viewingYear = year;
@@ -671,3 +659,4 @@
   </script>
 </body>
 </html>
+
