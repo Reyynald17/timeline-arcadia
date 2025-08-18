@@ -22,7 +22,6 @@
       padding: 0;
     }
 
-
     .particles {
       position: fixed;
       top: 0;
@@ -356,7 +355,6 @@
       transform: scale(1.05);
     }
 
-
     @media (max-width: 768px) {
       .container {
         padding: 15px;
@@ -375,7 +373,6 @@
         gap: 15px;
       }
     }
-
 
     .light-mode {
       background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 50%, #90caf9 100%);
@@ -445,10 +442,11 @@
   </div>
 
   <script>
-    const acdEpoch = new Date();
+    // Epoch ACD: 00:00 WIB 18 Agustus 2025 (RL) = 00:00 1 Januari 1890 (ACD)
+    const acdEpoch = new Date('2025-08-18T00:00:00+07:00');
     const acdDisplay = document.getElementById("acdTime");
 
-    const acdDayInRlSeconds = 27 * 60 + 37;
+    const acdDayInRlSeconds = 27 * 60 + 37; // 1657 detik real = 1 hari ACD
     const acdHourInRlSeconds = acdDayInRlSeconds / 24;
     const acdMinuteInRlSeconds = acdHourInRlSeconds / 60;
 
@@ -471,26 +469,35 @@
     function formatACDTime() {
       const now = new Date();
       
-      const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      // Hitung total detik real yang berlalu sejak epoch ACD
+      const totalRealSecondsElapsed = (now.getTime() - acdEpoch.getTime()) / 1000;
       
-      const selisihRlMs = now.getTime() - todayMidnight.getTime();
-      const selisihRlSeconds = selisihRlMs / 1000;
-
-      const totalAcdSeconds = selisihRlSeconds / acdMinuteInRlSeconds * 60;
-
-      const totalAcdMinutes = totalAcdSeconds / 60;
-      const totalAcdHours = totalAcdMinutes / 60;
-
-      const year = 1889;
-      const month = 12;
-      const day = 30;
+      // Konversi ke total detik ACD
+      const totalAcdSeconds = totalRealSecondsElapsed / acdMinuteInRlSeconds * 60;
       
-      const hour = Math.floor(totalAcdHours % 24);
-      const minute = Math.floor(totalAcdMinutes % 60);
-      const second = Math.floor(totalAcdSeconds % 60);
+      // Hitung total hari ACD yang berlalu
+      const totalAcdDays = Math.floor(totalAcdSeconds / (24 * 60 * 60));
+      
+      // Hitung tahun, bulan, hari ACD
+      const acdYears = Math.floor(totalAcdDays / 360); // 1 tahun ACD = 360 hari
+      const remainingDaysAfterYears = totalAcdDays % 360;
+      const acdMonths = Math.floor(remainingDaysAfterYears / 30); // 1 bulan ACD = 30 hari
+      const acdDay = (remainingDaysAfterYears % 30) + 1; // Hari dimulai dari 1
+      
+      // Tanggal ACD final (dimulai dari 1 Januari 1890)
+      const year = 1890 + acdYears;
+      const month = acdMonths + 1; // Bulan dimulai dari 1 (Januari)
+      const day = acdDay;
+      
+      // Hitung jam, menit, detik dari sisa detik dalam hari
+      const secondsInCurrentDay = totalAcdSeconds % (24 * 60 * 60);
+      const hour = Math.floor(secondsInCurrentDay / 3600);
+      const minute = Math.floor((secondsInCurrentDay % 3600) / 60);
+      const second = Math.floor(secondsInCurrentDay % 60);
 
       currentACD = { year, month, day };
       
+      // Set viewing month jika belum diset
       if (viewingMonth === 0) {
         viewingMonth = month;
         viewingYear = year;
