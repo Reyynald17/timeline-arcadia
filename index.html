@@ -1,783 +1,223 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arcadia Timeline</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@300;400&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      background: linear-gradient(135deg, #020739 0%, #0a0e1c 50%, #050c26 100%);
-      color: #f0f0f0;
-      font-family: 'Orbitron', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-      position: relative;
-      margin: 0;
-      padding: 0;
-    }
-
-    #splashScreen {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: linear-gradient(135deg, #020739 0%, #0a0e1c 50%, #050c26 100%);
-        z-index: 9999;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        transition: opacity 0.5s ease-out; 
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arcadia Timeline - Inversion Mode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
     
-    #splashLogo {
-        width: clamp(120px, 30vw, 200px);
-        height: clamp(120px, 30vw, 200px);
-        filter: drop-shadow(0 0 30px rgba(0, 255, 255, 1));
-        animation: pulseSplash 1.5s infinite alternate; 
-        border-radius: 50%;
-        object-fit: cover;
-        border: 5px solid rgba(0, 255, 255, 0.5);
-        position: relative;
-    }
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'acd-background': '#000000',
+                        'acd-surface': '#0a0a0a',
+                        'acd-cta': '#3C72A8',
+                        'acd-muted': '#ADADAD',
+                    },
+                    fontFamily: {
+                        headline: ['Poppins', 'sans-serif'],
+                        body: ['Montserrat', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .light-mode-active {
+            filter: invert(1) hue-rotate(180deg);
+            background-color: #ffffff;
+        }
 
-    .splash-loader {
-        width: clamp(150px, 30vw, 250px);
-        height: 5px;
-        background: rgba(0, 255, 255, 0.2);
-        margin-top: 30px;
-        border-radius: 5px;
-        overflow: hidden;
-    }
+        .light-mode-active img, 
+        .light-mode-active .no-invert {
+            filter: invert(1) hue-rotate(180deg);
+        }
 
-    .splash-loader::after {
-        content: '';
-        display: block;
-        height: 100%;
-        background: #00ffff;
-        width: 0%;
-        animation: loadingBar 3s forwards;
-    }
+        .calendar-day { aspect-ratio: 1/1; }
+        .particle { position: fixed; width: 2px; height: 2px; background: rgba(255, 255, 255, 0.15); border-radius: 50%; pointer-events: none; }
+        
+        /* Animasi untuk SVG Eksternal */
+        .svg-external-loader {
+            animation: slowRotate 4s linear infinite;
+        }
 
-    #mainContent {
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.5s ease-in;
-    }
-    
-    #mainContent.main-content-visible {
-        opacity: 1;
-        visibility: visible;
-    }
+        @keyframes slowRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
 
-    .particles {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .particle {
-      position: absolute;
-      width: 2px;
-      height: 2px;
-      background: rgba(0, 255, 255, 0.6); 
-      border-radius: 50%;
-      animation: float 6s infinite ease-in-out;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
-      50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
-    }
-    
-    @keyframes logoFloat {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-12px); }
-    }
-
-    .container {
-      position: relative;
-      z-index: 10;
-      text-align: center;
-      max-width: min(95vw, 1200px);
-      margin: 0 auto;
-      padding: clamp(10px, 3vw, 20px);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .header-section {
-      margin-bottom: clamp(20px, 5vw, 30px);
-      animation: fadeInUp 1s ease-out;
-    }
-
-    #arcadiaLogo {
-      width: clamp(100px, 20vw, 150px);
-      height: clamp(100px, 20vw, 150px);
-      margin-bottom: clamp(15px, 3vw, 20px);
-      filter: drop-shadow(0 0 25px rgba(0, 255, 255, 0.9));
-      animation: logoFloat 3s ease-in-out infinite; 
-      border-radius: 50%;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      object-fit: cover;
-      border: 3px solid rgba(0, 255, 255, 0.5);
-    }
-
-    #arcadiaLogo:hover {
-      transform: scale(1.1) rotate(-5deg);
-      filter: drop-shadow(0 0 40px rgba(0, 255, 255, 1));
-    }
-
-    h1 {
-      color: #00ffff;
-      font-family: 'Orbitron', sans-serif;
-      font-size: clamp(2.5rem, 6vw, 4.5rem);
-      margin-bottom: 5px;
-      text-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
-      font-weight: 700;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-    }
-
-    .subtitle {
-      font-size: clamp(1rem, 2.5vw, 1.2rem);
-      color: #b3e5fc;
-      margin-bottom: clamp(20px, 5vw, 30px);
-      opacity: 0.9;
-      font-family: 'Roboto Mono', monospace;
-    }
-
-    .time-display {
-      background: rgba(0, 255, 255, 0.05);
-      backdrop-filter: blur(15px);
-      border: 2px solid rgba(0, 255, 255, 0.5);
-      padding: clamp(25px, 6vw, 40px);
-      border-radius: 25px;
-      box-shadow: 
-        0 10px 40px rgba(0, 255, 255, 0.2),
-        inset 0 0 15px rgba(0, 255, 255, 0.3);
-      margin-bottom: clamp(30px, 6vw, 50px);
-      transition: all 0.4s ease;
-      position: relative;
-      overflow: hidden;
-      width: 100%;
-      max-width: 700px;
-    }
-
-    .time-display::before {
-      content: '<<< A R C A D I A >>>';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      color: rgba(0, 255, 255, 0.05);
-      font-size: 5rem;
-      font-family: 'Orbitron', sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-      opacity: 0.8;
-      transform: rotate(-10deg);
-    }
-
-    .time-display:hover {
-      transform: scale(1.02);
-      box-shadow: 
-        0 20px 50px rgba(0, 255, 255, 0.3),
-        0 0 40px rgba(0, 255, 255, 0.5);
-    }
-    
-    .time-group {
-        position: relative;
-        z-index: 2;
-    }
-
-    .acd-date, .acd-time {
-      font-family: 'Roboto Mono', monospace;
-      font-weight: 700;
-      letter-spacing: 3px;
-      color: #00ffff;
-      text-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
-      word-break: break-all;
-      line-height: 1.2;
-    }
-    
-    .acd-date {
-        font-size: clamp(1.2rem, 4vw, 2.5rem);
-        margin-bottom: 5px;
-    }
-    
-    .acd-time {
-        font-size: clamp(1.5rem, 5vw, 3rem);
-    }
-
-    .time-info {
-      font-size: clamp(0.9rem, 2vw, 1rem);
-      color: #80deea;
-      margin-top: 15px;
-      font-family: 'Roboto Mono', monospace;
-      position: relative;
-      z-index: 2;
-    }
-
-    .calendar-section {
-      width: 100%;
-      max-width: min(90vw, 650px);
-      animation: fadeInUp 1s ease-out 0.3s both;
-    }
-
-    .calendar-header {
-      background: rgba(0, 255, 255, 0.1);
-      padding: clamp(18px, 4vw, 25px);
-      border-radius: 18px 18px 0 0;
-      border: 1px solid rgba(0, 255, 255, 0.4);
-      margin-bottom: 0;
-    }
-
-    .calendar-header h3 {
-      color: #00ffff;
-      font-family: 'Orbitron', sans-serif;
-      font-size: clamp(1.3rem, 3vw, 1.8rem);
-      margin-bottom: 10px;
-      text-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
-    }
-
-    .calendar-nav {
-      display: flex;
-      justify-content: center;
-      gap: clamp(10px, 3vw, 20px);
-      margin-top: 15px;
-      flex-wrap: wrap;
-    }
-
-    .nav-btn {
-      background: rgba(0, 255, 255, 0.15);
-      border: 1px solid rgba(0, 255, 255, 0.7);
-      color: #00ffff;
-      padding: clamp(8px 15px, 2vw, 10px 20px);
-      border-radius: 30px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: clamp(0.85rem, 2vw, 1rem);
-      white-space: nowrap;
-      font-family: 'Roboto Mono', monospace;
-    }
-
-    .nav-btn:hover {
-      background: rgba(0, 255, 255, 0.3);
-      transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-    }
-
-    .calendar-body {
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(15px);
-      border: 1px solid rgba(0, 255, 255, 0.4);
-      border-top: none;
-      border-radius: 0 0 18px 18px;
-      padding: clamp(15px, 4vw, 25px);
-      margin-bottom: clamp(30px, 6vw, 50px);
-    }
-
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: clamp(5px, 1.5vw, 10px);
-      margin-top: 15px;
-    }
-
-    .day-header {
-      padding: clamp(8px 3px, 2vw, 12px 5px);
-      font-weight: 700;
-      color: #00ffff;
-      text-align: center;
-      font-size: clamp(0.75rem, 2vw, 1rem);
-      border-bottom: 2px solid rgba(0, 255, 255, 0.3);
-      margin-bottom: 5px;
-      font-family: 'Roboto Mono', monospace;
-    }
-
-    .calendar-day {
-      aspect-ratio: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 12px;
-      background: rgba(0, 255, 255, 0.1);
-      color: #e0f7fa;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 500;
-      position: relative;
-      overflow: hidden;
-      font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-      min-height: clamp(40px, 8vw, 55px);
-      border: 1px solid rgba(0, 255, 255, 0.2);
-      font-family: 'Roboto Mono', monospace;
-      z-index: 1;
-    }
-
-    .calendar-day::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      background: rgba(0, 255, 255, 0.3);
-      border-radius: 50%;
-      transition: all 0.4s ease;
-      transform: translate(-50%, -50%);
-      z-index: -1;
-    }
-
-    .calendar-day:hover::before {
-      width: 120%;
-      height: 120%;
-      opacity: 0.5;
-    }
-
-    .calendar-day:hover {
-      color: #00ffff;
-      transform: scale(1.1);
-    }
-
-    .calendar-day.today {
-      background: linear-gradient(135deg, #00ffff, #00e5ff);
-      color: #020739;
-      font-weight: 700;
-      box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
-      animation: pulse 2s infinite;
-    }
-
-    .calendar-day.today:hover {
-      transform: scale(1.15);
-    }
-
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 25px rgba(0, 255, 255, 0.8); }
-      50% { box-shadow: 0 0 40px rgba(0, 255, 255, 1); }
-    }
-    
-    @keyframes pulseSplash {
-        0% { box-shadow: 0 0 0 0 rgba(0, 255, 255, 0.7); }
-        100% { box-shadow: 0 0 0 20px rgba(0, 255, 255, 0); }
-    }
-    
-    @keyframes loadingBar {
-        0% { width: 0%; }
-        100% { width: 100%; }
-    }
-
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(40px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .mode-toggle {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: rgba(0, 255, 255, 0.2);
-      border: 1px solid rgba(0, 255, 255, 0.6);
-      color: #00ffff;
-      padding: 10px 18px;
-      border-radius: 30px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      z-index: 100;
-      font-family: 'Roboto Mono', monospace;
-      box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
-    }
-
-    .mode-toggle:hover {
-      background: rgba(0, 255, 255, 0.4);
-      transform: scale(1.08);
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
-    }
-
-    @media (max-width: 768px) {
-      .container {
-        padding: 15px;
-      }
-      
-      .calendar-grid {
-        gap: 8px;
-      }
-      
-      .calendar-day {
-        font-size: 1rem;
-      }
-      
-      h1 {
-        font-size: clamp(2rem, 8vw, 4rem);
-      }
-    }
-
-    .light-mode {
-      background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 50%, #80deea 100%);
-      color: #01579b;
-    }
-
-    .light-mode .time-display,
-    .light-mode .calendar-body {
-      background: rgba(255, 255, 255, 0.95);
-      color: #01579b;
-      border-color: rgba(0, 188, 212, 0.7);
-      box-shadow: 0 10px 40px rgba(0, 188, 212, 0.2), inset 0 0 15px rgba(0, 188, 212, 0.1);
-    }
-    
-    .light-mode .time-display:hover {
-        box-shadow: 0 20px 50px rgba(0, 188, 212, 0.3), 0 0 40px rgba(0, 188, 212, 0.5);
-    }
-
-    .light-mode .acd-date,
-    .light-mode .acd-time,
-    .light-mode h1,
-    .light-mode .calendar-header h3 {
-      color: #00bcd4;
-      text-shadow: 0 0 10px rgba(0, 188, 212, 0.5);
-    }
-
-    .light-mode .calendar-day {
-      background: rgba(0, 188, 212, 0.1);
-      color: #01579b;
-      border-color: rgba(0, 188, 212, 0.3);
-    }
-
-    .light-mode .calendar-day::before {
-        background: rgba(0, 188, 212, 0.3);
-    }
-    
-    .light-mode .calendar-day:hover {
-        color: #00bcd4;
-    }
-
-    .light-mode .calendar-day.today {
-      background: linear-gradient(135deg, #00bcd4, #00e5ff);
-      color: #fff;
-      box-shadow: 0 0 25px rgba(0, 188, 212, 0.8);
-    }
-    
-    .light-mode .day-header {
-        color: #00bcd4;
-        border-color: rgba(0, 188, 212, 0.5);
-    }
-    
-    .light-mode .nav-btn {
-        background: rgba(0, 188, 212, 0.2);
-        border-color: rgba(0, 188, 212, 0.7);
-        color: #00bcd4;
-    }
-    
-    .light-mode .mode-toggle {
-        background: rgba(0, 188, 212, 0.2);
-        border-color: rgba(0, 188, 212, 0.7);
-        color: #00bcd4;
-        box-shadow: 0 0 10px rgba(0, 188, 212, 0.3);
-    }
-    
-    .light-mode .mode-toggle:hover {
-        background: rgba(0, 188, 212, 0.4);
-        box-shadow: 0 0 20px rgba(0, 188, 212, 0.6);
-    }
-    
-    .light-mode .calendar-header {
-        background: rgba(0, 188, 212, 0.15);
-        border-color: rgba(0, 188, 212, 0.5);
-    }
-    
-    .light-mode .subtitle {
-        color: #00bcd4;
-    }
-  </style>
+        @keyframes burstFade {
+            0% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0px); opacity: 1; }
+            100% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(70px); opacity: 0; }
+        }
+    </style>
 </head>
-<body>
-  <div id="splashScreen">
-      <img id="splashLogo" src="logo.png" alt="Simbol Arcadia - Loading" />
-      <div class="splash-loader"></div>
-  </div>
+<body class="bg-acd-background text-white font-body transition-all duration-500 overflow-x-hidden">
 
-  <div class="particles" id="particles"></div>
-  
-  <button class="mode-toggle" onclick="toggleMode()">Light Mode</button>
-
-  <div id="mainContent" class="main-content-hidden">
-    <div class="container">
-      <div class="header-section">
-        <img id="arcadiaLogo" src="logo.png" alt="Simbol Arcadia - Gerbang Waktu" />
-        <h1>Timeline Arcadia (ACD)</h1>
-        <p class="subtitle">Waktu Universal Arcadia Saat Ini:</p>
-      </div>
-
-      <div class="time-display">
-        <div class="time-group">
-          <div class="acd-date" id="acdDate">Memuat Tanggal...</div>
-          <div class="acd-time" id="acdTime">Memuat Waktu...</div>
-        </div>
-      </div>
-
-      <div class="calendar-section">
-        <div class="calendar-header">
-          <h3 id="monthYear">Kalender Arcadia</h3>
-          <div class="calendar-nav">
-            <button class="nav-btn" onclick="changeMonth(-1)">← Bulan Lalu</button>
-            <button class="nav-btn" onclick="resetToToday()">Bulan Ini</button>
-            <button class="nav-btn" onclick="changeMonth(1)">Bulan Depan →</button>
-          </div>
-        </div>
-        <div class="calendar-body">
-          <div class="calendar-grid" id="dayHeaders"></div>
-          <div class="calendar-grid" id="calendar"></div>
-        </div>
-      </div>
-      
-      </div>
-  </div>
-  <script>
-    // epoch: 00:00 WIB 27 Oktober 2025 = Awal Tahun 1913 ACD
-    const acdEpoch = new Date('2025-10-27T00:00:00+07:00');
-    const acdDateDisplay = document.getElementById("acdDate");
-    const acdTimeDisplay = document.getElementById("acdTime");
-
-    const acdDayInRlSeconds = 1680; 
-    const acdHourInRlSeconds = acdDayInRlSeconds / 24;
-    const acdMinuteInRlSeconds = acdHourInRlSeconds / 60;
-
-    const namaBulan = [
-      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-    ];
-
-    const namaHari = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
-
-    let currentACD = { year: 0, month: 0, day: 0 };
-    let viewingMonth = 0;
-    let viewingYear = 0;
-    let isLightMode = false;
-
-    function pad(n) {
-      return String(Math.floor(n)).padStart(2, '0');
-    }
-
-    function formatACDTime() {
-      const now = new Date();
-      const totalRealSecondsElapsed = (now.getTime() - acdEpoch.getTime()) / 1000;
-      const totalAcdSeconds = totalRealSecondsElapsed / acdMinuteInRlSeconds * 60;
-      const totalAcdDays = Math.floor(totalAcdSeconds / (24 * 60 * 60));
-      const acdYears = Math.floor(totalAcdDays / 360); // 1 tahun ACD = 360 hari
-      const remainingDaysAfterYears = totalAcdDays % 360;
-      const acdMonths = Math.floor(remainingDaysAfterYears / 30); // 1 bulan ACD = 30 hari
-      const acdDay = (remainingDaysAfterYears % 30) + 1; // Hari dimulai dari 1
-      
-      const year = 1921 + acdYears; // EPOCH BARU
-      const month = acdMonths + 1; 
-      const day = acdDay;
-      
-      
-      const secondsInCurrentDay = totalAcdSeconds % (24 * 60 * 60);
-      const hour = Math.floor(secondsInCurrentDay / 3600);
-      const minute = Math.floor((secondsInCurrentDay % 3600) / 60);
-      const second = Math.floor(secondsInCurrentDay % 60);
-
-      currentACD = { year, month, day };
-      if (viewingMonth === 0) {
-        viewingMonth = month;
-        viewingYear = year;
-      }
-
-      const dayOfYear = (month - 1) * 30 + day;
-
-      return {
-        // Format: Hari/Bulan/Tahun
-        dateString: `${pad(day)}/${pad(month)}/${year} ACD`,
-        // Format: Jam:Menit:Detik
-        timeString: `${pad(hour)}:${pad(minute)}:${pad(second)}`,
-        dayOfYear: dayOfYear,
-        weekNumber: Math.floor(dayOfYear / 7) + 1,
-      };
-    }
-
-    function renderCalendar() {
-      const calendarContainer = document.getElementById("calendar");
-      const monthYearElement = document.getElementById("monthYear");
-      const dayHeadersElement = document.getElementById("dayHeaders");
-      
-      calendarContainer.innerHTML = '';
-      dayHeadersElement.innerHTML = '';
-
-      namaHari.forEach(day => {
-        const header = document.createElement('div');
-        header.className = 'day-header';
-        header.textContent = day;
-        dayHeadersElement.appendChild(header);
-      });
-
-      const nama = namaBulan[(viewingMonth - 1) % 12];
-      monthYearElement.textContent = `${nama}, Tahun ${viewingYear} ACD`;
-
-      for (let i = 1; i <= 30; i++) {
-        const dayBox = document.createElement('div');
-        dayBox.className = 'calendar-day';
-        dayBox.textContent = i;
-        
-        if (i === currentACD.day && viewingMonth === currentACD.month && viewingYear === currentACD.year) {
-          dayBox.classList.add('today');
-        }
-        
-        dayBox.addEventListener('click', () => {
-          document.querySelectorAll('.calendar-day.selected').forEach(d => d.classList.remove('selected'));
-          dayBox.classList.add('selected');
-          
-          dayBox.style.animation = 'pulse 0.5s ease';
-          setTimeout(() => dayBox.style.animation = '', 500);
-        });
-        
-        calendarContainer.appendChild(dayBox);
-      }
-    }
-
-    function changeMonth(direction) {
-      viewingMonth += direction;
-      if (viewingMonth > 12) {
-        viewingMonth = 1;
-        viewingYear += 1;
-      } else if (viewingMonth < 1) {
-        viewingMonth = 12;
-        viewingYear -= 1;
-      }
-      renderCalendar();
-    }
-
-    function resetToToday() {
-      viewingMonth = currentACD.month;
-      viewingYear = currentACD.year;
-      renderCalendar();
-    }
-
-    function toggleMode() {
-      isLightMode = !isLightMode;
-      document.body.classList.toggle('light-mode');
-      document.querySelector('.mode-toggle').textContent = isLightMode ? 'Dark Mode' : 'Light Mode';
-    }
-
-    function createParticles() {
-      const particlesContainer = document.getElementById('particles');
-      const particleCount = 70;
-
-      for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        particle.style.left = Math.random() * 100 + '%';
-        particle.style.top = Math.random() * 100 + '%';
-        particle.style.animationDelay = Math.random() * 6 + 's';
-        particle.style.animationDuration = (3 + Math.random() * 6) + 's';
-        particlesContainer.appendChild(particle);
-      }
-    }
-
-    function renderACDTime() {
-      const timeData = formatACDTime();
-      acdDateDisplay.textContent = timeData.dateString;
-      acdTimeDisplay.textContent = timeData.timeString;
-      renderCalendar();
-      requestAnimationFrame(renderACDTime);
-    }
-
-    document.addEventListener('mousemove', (e) => {
-      const particles = document.querySelectorAll('.particle');
-      const mouseX = e.clientX / window.innerWidth;
-      const mouseY = e.clientY / window.innerHeight;
-      
-      particles.forEach((particle, index) => {
-        if (index % 3 === 0) {
-          const offsetX = (mouseX - 0.5) * 30;
-          const offsetY = (mouseY - 0.5) * 30;
-          particle.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-        }
-      });
-    });
-
-    document.getElementById('arcadiaLogo').addEventListener('click', () => {
-      const logo = document.getElementById('arcadiaLogo');
-      
-      for (let i = 0; i < 18; i++) {
-        const burst = document.createElement('div');
-        burst.style.position = 'absolute';
-        burst.style.width = '3px';
-        burst.style.height = '3px';
-        burst.style.background = '#00ffff';
-        burst.style.borderRadius = '50%';
-        burst.style.pointerEvents = 'none';
-        burst.style.left = '50%';
-        burst.style.top = '50%';
-        burst.style.setProperty('--angle', `${i * (360/18)}deg`);
-        burst.style.transform = `translate(-50%, -50%) rotate(${i * (360/18)}deg) translateX(50px)`;
-        burst.style.animation = 'burstFade 0.8s ease-out forwards';
-        logo.parentNode.appendChild(burst); 
-        
-        setTimeout(() => burst.remove(), 800);
-      }
-    });
-
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes burstFade {
-        0% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0px); opacity: 1; }
-        100% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(70px); opacity: 0; }
-      }
-    `;
-    document.head.appendChild(style);
-
-    function initializeSplash() {
-        const splashScreen = document.getElementById('splashScreen');
-        const mainContent = document.getElementById('mainContent');
-        
-        setTimeout(() => {
-            mainContent.classList.remove('main-content-hidden');
-            mainContent.classList.add('main-content-visible');
-            splashScreen.style.opacity = '0';
-            setTimeout(() => {
-                splashScreen.style.display = 'none';
-            }, 500); 
+    <div id="splashScreen" class="fixed inset-0 bg-acd-background z-[9999] flex flex-col justify-center items-center transition-opacity duration-700">
+        <div class="relative w-48 h-48 flex items-center justify-center">
+            <img src="loader.svg" alt="Loading..." class="svg-external-loader w-full h-full object-contain" />
             
-        }, 3000); 
-        
-        renderACDTime();
-        createParticles();
-    }
+            <img src="logo.png" class="absolute w-20 h-20 rounded-full" alt="Logo center" />
+        </div>
+        <div class="mt-8 font-headline tracking-[0.4em] text-acd-cta text-xs uppercase animate-pulse">ARCADIAN PROPERTY</div>
+    </div>
 
-    initializeSplash(); 
-  </script>
+    <div id="particles" class="fixed inset-0 pointer-events-none"></div>
+
+    <button id="modeToggle" class="fixed bottom-5 right-5 bg-acd-surface border border-acd-cta text-white px-5 py-2 rounded-sm z-50 font-headline text-sm uppercase no-invert">
+        Light Mode
+    </button>
+
+    <div id="mainContent" class="opacity-0 transition-opacity duration-1000 pt-12">
+        <div class="max-w-4xl mx-auto px-5 text-center">
+            
+            <header class="mb-12">
+                <div class="relative inline-block">
+                    <img id="arcadiaLogo" src="logo.png" alt="Logo" class="w-32 h-32 rounded-full border-2 border-acd-cta mb-5 mx-auto cursor-pointer transition-transform hover:scale-105" />
+                </div>
+                <h1 class="font-headline font-bold text-4xl md:text-6xl text-[#E0E0E0] tracking-widest uppercase mb-2">Timeline Arcadia</h1>
+                <p class="font-headline text-acd-muted text-lg">Waktu Universal Arcadia Saat Ini:</p>
+            </header>
+
+            <section class="bg-acd-surface border border-white/10 p-10 rounded-lg mb-14 shadow-2xl">
+                <div id="acdDate" class="text-2xl text-acd-cta font-bold mb-2">Memuat Tanggal...</div>
+                <div id="acdTime" class="text-5xl md:text-7xl font-bold tracking-widest font-headline">00:00:00</div>
+            </section>
+
+            <section class="bg-acd-surface rounded-lg overflow-hidden border border-white/10 mb-20">
+                <div class="p-8 border-b border-white/10">
+                    <h3 id="monthYear" class="font-headline text-3xl mb-5">Kalender Arcadia</h3>
+                    <div class="flex justify-center gap-4">
+                        <button onclick="changeMonth(-1)" class="border border-acd-cta px-4 py-2 text-xs uppercase hover:bg-acd-cta transition-all">← Bulan Lalu</button>
+                        <button onclick="resetToToday()" class="border border-acd-cta px-4 py-2 text-xs uppercase hover:bg-acd-cta transition-all">Bulan Ini</button>
+                        <button onclick="changeMonth(1)" class="border border-acd-cta px-4 py-2 text-xs uppercase hover:bg-acd-cta transition-all">Bulan Depan →</button>
+                    </div>
+                </div>
+                <div class="p-8">
+                    <div id="dayHeaders" class="grid grid-cols-7 gap-2 mb-4"></div>
+                    <div id="calendar" class="grid grid-cols-7 gap-2"></div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        const acdEpoch = new Date('2025-10-27T00:00:00+07:00');
+        const acdDayInRlSeconds = 1680; 
+        const namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        const namaHari = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
+
+        let currentACD = { year: 0, month: 0, day: 0 };
+        let viewingMonth = 0;
+        let viewingYear = 0;
+
+        const pad = (n) => String(Math.floor(n)).padStart(2, '0');
+
+        function calculateTime() {
+            const now = new Date();
+            const totalRealSecondsElapsed = (now.getTime() - acdEpoch.getTime()) / 1000;
+            const acdMinuteInRlSeconds = acdDayInRlSeconds / 1440;
+            const totalAcdSeconds = totalRealSecondsElapsed / acdMinuteInRlSeconds * 60;
+            
+            const totalAcdDays = Math.floor(totalAcdSeconds / (24 * 60 * 60));
+            const acdYears = Math.floor(totalAcdDays / 360);
+            const remainingDays = totalAcdDays % 360;
+            
+            currentACD.year = 1921 + acdYears;
+            currentACD.month = Math.floor(remainingDays / 30) + 1;
+            currentACD.day = (remainingDays % 30) + 1;
+
+            if (viewingMonth === 0) {
+                viewingMonth = currentACD.month;
+                viewingYear = currentACD.year;
+            }
+
+            const secondsInDay = totalAcdSeconds % (24 * 60 * 60);
+            const hour = Math.floor(secondsInDay / 3600);
+            const minute = Math.floor((secondsInDay % 3600) / 60);
+            const second = Math.floor(secondsInDay % 60);
+
+            $('#acdDate').text(`${pad(currentACD.day)}/${pad(currentACD.month)}/${currentACD.year} ACD`);
+            $('#acdTime').text(`${pad(hour)}:${pad(minute)}:${pad(second)}`);
+            
+            renderCalendar();
+            requestAnimationFrame(calculateTime);
+        }
+
+        function renderCalendar() {
+            const $grid = $('#calendar').empty();
+            const $headers = $('#dayHeaders').empty();
+
+            namaHari.forEach(h => {
+                $('<div class="text-acd-cta font-bold text-sm pb-4">').text(h).appendTo($headers);
+            });
+
+            $('#monthYear').text(`${namaBulan[(viewingMonth - 1) % 12]}, Tahun ${viewingYear} ACD`);
+
+            for (let i = 1; i <= 30; i++) {
+                const isToday = (i === currentACD.day && viewingMonth === currentACD.month && viewingYear === currentACD.year);
+                const $day = $('<div>')
+                    .addClass('calendar-day flex items-center justify-center border border-white/5 cursor-pointer transition-all hover:bg-acd-cta')
+                    .text(i);
+
+                if (isToday) {
+                    $day.addClass('bg-acd-cta font-bold shadow-[0_0_15px_rgba(60,114,168,0.5)]');
+                }
+                $grid.append($day);
+            }
+        }
+
+        window.changeMonth = (dir) => {
+            viewingMonth += dir;
+            if (viewingMonth > 12) { viewingMonth = 1; viewingYear++; }
+            else if (viewingMonth < 1) { viewingMonth = 12; viewingYear--; }
+        };
+
+        window.resetToToday = () => {
+            viewingMonth = currentACD.month;
+            viewingYear = currentACD.year;
+        };
+
+        $(document).ready(function() {
+            setTimeout(() => {
+                $('#mainContent').removeClass('opacity-0').addClass('opacity-100');
+                $('#splashScreen').addClass('opacity-0');
+                setTimeout(() => $('#splashScreen').hide(), 700);
+            }, 3000);
+
+            for(let i=0; i<70; i++) {
+                $('<div class="particle">').css({
+                    left: Math.random() * 100 + '%',
+                    top: Math.random() * 100 + '%',
+                    animation: `slowRotate ${5 + Math.random() * 5}s linear infinite`
+                }).appendTo('#particles');
+            }
+
+            $('#modeToggle').on('click', function() {
+                const isLight = $('html').toggleClass('light-mode-active').hasClass('light-mode-active');
+                $(this).text(isLight ? 'Dark Mode' : 'Light Mode');
+            });
+
+            $('#arcadiaLogo').on('click', function(e) {
+                for (let i = 0; i < 18; i++) {
+                    $('<div class="absolute w-1 h-1 bg-acd-cta rounded-full pointer-events-none">')
+                        .css({
+                            left: '50%', top: '50%',
+                            '--angle': `${i * 20}deg`,
+                            animation: 'burstFade 0.8s ease-out forwards'
+                        })
+                        .appendTo($(this).parent())
+                        .on('animationend', function() { $(this).remove(); });
+                }
+            });
+
+            calculateTime();
+        });
+    </script>
 </body>
 </html>
-
-
-
-
-
